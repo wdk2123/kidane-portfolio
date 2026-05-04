@@ -168,7 +168,18 @@ if not DEBUG:
     # settings.py
 #
 # settings.py
-CSRF_TRUSTED_ORIGINS = [
-    "https://kidane-portfolio.onrender.com",
-    "https://*.onrender.com"
+# settings.py
+
+# Replace with your actual Vercel link (No trailing slash at the end!)
+CORS_ALLOWED_ORIGINS = [
+    "https://kidane-portfolio-frontend.vercel.app",
+    "http://localhost:5173",
 ]
+
+# This is required for Django 4.0+
+CSRF_TRUSTED_ORIGINS = [
+    "https://kidane-portfolio-frontend.vercel.app",
+    "https://kidane-portfolio.onrender.com"
+]
+
+CORS_ALLOW_CREDENTIALS = True
