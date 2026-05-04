@@ -7,7 +7,7 @@ import { projects, skills, experiences, education, blogPosts } from '../data/moc
  */
 
 // We hardcode these to ensure the connection works immediately
-const API_BASE = 'http://127.0.0.1:8000/api'; 
+const API_BASE = 'https://kidane-portfolio.onrender.com/api'; 
 const USE_REAL_API = true; 
 
 // Axios instance
