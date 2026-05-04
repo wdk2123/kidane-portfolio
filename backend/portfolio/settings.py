@@ -161,3 +161,14 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+
+
+
+    # settings.py
+#
+# settings.py
+CSRF_TRUSTED_ORIGINS = [
+    "https://kidane-portfolio.onrender.com",
+    "https://*.onrender.com"
+]
