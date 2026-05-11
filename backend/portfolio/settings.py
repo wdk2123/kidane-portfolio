@@ -1,13 +1,10 @@
-"""
-Django settings for portfolio project.
 
-Production-ready configuration with PostgreSQL, JWT auth, and security settings.
-"""
 
 import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -76,9 +73,8 @@ WSGI_APPLICATION = 'portfolio.wsgi.application'
 # Database
 DATABASES = {
     'default': dj_database_url.config(
-        # Replace the part below with your local Postgres details
-        default='postgres://postgres:your_password@localhost:5432/your_db_name',
-        conn_max_age=600
+        conn_max_age=600,
+        conn_health_checks=True,
     )
 }
 # Password validation
