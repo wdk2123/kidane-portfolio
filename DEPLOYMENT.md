@@ -48,8 +48,8 @@ Your `backend/` folder is already in the repo.
    - **Name:** `portfolio-api`
    - **Root Directory:** `backend`
    - **Environment:** `Python 3`
-   - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput`
-   - **Start Command:** `gunicorn portfolio.wsgi:application`
+   - **Build Command:** `bash build.sh`
+   - **Start Command:** `bash start.sh`
    - **Instance Type:** Free
 
 #### Step 3: Add Environment Variables on Render
