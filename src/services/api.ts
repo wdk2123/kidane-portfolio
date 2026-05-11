@@ -3,16 +3,27 @@ import { Project, Skill, Experience, Education, BlogPost, ContactMessage, ApiRes
 import { projects, skills, experiences, education, blogPosts } from '../data/mockData';
 
 /**
- * API Service Layer — FIXED CONFIGURATION
+ * API base URL from `VITE_API_URL`.
+ * - Production: must set VITE_API_URL (e.g. Render API); unset → mock data only.
+ * - Development: unset → http://127.0.0.1:8000/api (local Django).
+ * - Set `VITE_API_URL=` (empty) to force mock data even in dev.
+ * - Or use `VITE_API_URL=/api` with Vite proxy (same-origin, no CORS).
  */
+function resolveApiBase(): string {
+  const raw = import.meta.env.VITE_API_URL;
+  if (raw === '') return '';
+  const trimmed = typeof raw === 'string' ? raw.trim() : '';
+  if (trimmed) return trimmed.replace(/\/$/, '');
+  if (import.meta.env.DEV) return 'http://127.0.0.1:8000/api';
+  return '';
+}
 
-// We hardcode these to ensure the connection works immediately
-const API_BASE = 'https://kidane-portfolio.onrender.com/api'; 
-const USE_REAL_API = true; 
+const API_BASE = resolveApiBase();
+const USE_REAL_API = Boolean(API_BASE);
 
 // Axios instance
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE || undefined,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
@@ -138,8 +149,29 @@ export const blogApi = {
 };
 
 export const contactApi = {
+  /**
+   * Public endpoint — POST without JWT so stray tokens can't affect submission.
+   * Uses explicit URL when `VITE_API_URL=` (mock reads) but contact should still reach Django in dev.
+   */
   submit: async (message: ContactMessage) => {
-    const response = await api.post('/contact/', message);
+    const root =
+      API_BASE.replace(/\/$/, '') ||
+      (import.meta.env.DEV ? 'http://127.0.0.1:8000/api' : '');
+    if (!root) {
+      throw new Error(
+        'Contact API URL is not set. Add VITE_API_URL in production builds.'
+      );
+    }
+    const payload = {
+      name: message.name,
+      email: message.email,
+      subject: message.subject,
+      message: message.message,
+    };
+    const response = await axios.post(`${root}/contact/`, payload, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 15000,
+    });
     return { data: response.data, message: 'Sent!' };
   },
 };
@@ -151,6 +183,9 @@ export const authApi = {
     if (refresh) localStorage.setItem('refreshToken', refresh);
     localStorage.setItem('token', access);
     return { token: access, user: user || { username, is_admin: true } };
+  },
+  verify: async (token: string) => {
+    await api.post('/auth/verify/', { token });
   },
   refresh: async () => {
     const refresh = localStorage.getItem('refreshToken');

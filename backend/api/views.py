@@ -28,6 +28,13 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return request.user and request.user.is_staff
 
 
+class IsStaffForContact(permissions.BasePermission):
+    """List/read/update/delete contact messages — staff only (not public inbox)."""
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_staff)
+
+
 class ProjectViewSet(viewsets.ModelViewSet):
     """
     CRUD for Projects.
@@ -115,12 +122,16 @@ class BlogPostViewSet(viewsets.ModelViewSet):
 class ContactMessageViewSet(viewsets.ModelViewSet):
     """
     Handle contact form submissions.
-    
+
     POST: Anyone can submit a message (throttled).
-    GET/LIST: Admin only.
+    GET/LIST/PUT/PATCH/DELETE: Staff only — public submissions must not imply staff.
     """
     serializer_class = ContactMessageSerializer
-    permission_classes = [IsAdminOrReadOnly]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [IsStaffForContact()]
 
     def get_queryset(self):
         return ContactMessage.objects.all()

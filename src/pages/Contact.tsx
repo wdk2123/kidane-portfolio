@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { contactApi } from '../services/api';
@@ -20,8 +21,29 @@ export default function Contact() {
       setSubmitted(true);
       reset();
       setTimeout(() => setSubmitted(false), 5000);
-    } catch {
-      setError('Failed to send message. Please try again.');
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        if (e.code === 'ERR_NETWORK' || !e.response) {
+          setError(
+            'Cannot reach the server. Start the Django backend (port 8000) or check VITE_API_URL.'
+          );
+        } else {
+          const detail =
+            (e.response.data as { detail?: string })?.detail ||
+            (typeof e.response.data === 'object' &&
+              JSON.stringify(e.response.data).slice(0, 200)) ||
+            e.response.statusText;
+          setError(
+            typeof detail === 'string'
+              ? detail
+              : 'Failed to send message. Please try again.'
+          );
+        }
+      } else if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('Failed to send message. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
