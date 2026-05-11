@@ -4,8 +4,8 @@ set -o errexit
 
 pip install -r requirements.txt
 
-python manage.py collectstatic --no-input
-python manage.py migrate
+# Build step should not depend on database connectivity.
+python manage.py collectstatic --noinput
 
 # This line creates the admin user automatically using the Env Variables
 if [ "$DJANGO_SUPERUSER_USERNAME" ]; then
